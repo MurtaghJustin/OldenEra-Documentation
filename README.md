@@ -9,8 +9,10 @@ It was produced by reverse-engineering the 61 official templates in `../Template
 preview images, and the community **[Olden Era Template Generator]** (a C# editor whose model
 classes and bundled game data are the best available description of the schema). Where a fact
 comes only from the editor (and is therefore the editor author's interpretation rather than
-confirmed game behaviour) it is flagged **[editor-inferred]**. Genuine unknowns and ways to
-test them in-game are collected in **[06 — Open Questions & Test Plan](06-open-questions-and-tests.md)**.
+confirmed game behaviour) it is flagged **[editor-inferred]** — though many such facts have since
+been **confirmed in-game** via probe templates (noted inline). The open questions, the in-game
+tests, and the results that resolved most of them are in
+**[06 — Open Questions & Test Plan](06-open-questions-and-tests.md)**.
 
 [Olden Era Template Generator]: ../Olden-Era---Template-Generator
 
@@ -54,8 +56,8 @@ topology modes are strategies for *producing* such graphs. See
 | [03 — Variants, Zones & Connections](03-variants-zones-connections.md) | `variants`/`orientation`/`border`, the full `zone` field reference, `connections`, `roads`, biomes, topology shapes. |
 | [04 — Content & Placement System](04-content-and-placement.md) | Content pools, content lists, `mandatoryContent`, `contentCountLimits`, placement `rules`, `variant` indices, value budgets. |
 | [05 — ID Reference](05-id-reference.md) | Catalogs: object SIDs → names, zone layouts, construction SIDs, biomes, spells, bannable artifacts, win-condition IDs, etc. |
-| [06 — Open Questions & Test Plan](06-open-questions-and-tests.md) | What we could **not** determine, and concrete in-game tests (with ready-to-run probe templates) to resolve them. |
-| [test-templates/](test-templates/) | Minimal templates you can drop into the game to answer specific open questions. |
+| [06 — Open Questions & Test Plan](06-open-questions-and-tests.md) | What static analysis couldn't determine, the in-game probe tests, and their results — **most now resolved**; the few remaining open items are flagged. |
+| [test-templates/](test-templates/) | 13 minimal probe templates (all run in-game) that isolate one behaviour each. |
 
 ---
 

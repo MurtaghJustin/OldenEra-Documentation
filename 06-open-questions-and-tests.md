@@ -1,25 +1,27 @@
 # 06 — Open Questions & Test Plan
 
-This page lists everything that could **not** be confidently resolved from the templates, preview
-images, and the community editor, then gives concrete in-game tests to resolve them. Three
-ready-to-run probe templates live in [`test-templates/`](test-templates/).
+This page lists everything that could **not** be resolved from static analysis (the templates,
+preview images, and the community editor) — and, for the many since tested in-game, the **results
+that resolved them**. Each question in section A is tagged with its current status; section B
+documents the probe templates (13 so far, in [`test-templates/`](test-templates/)) and what each
+one confirmed.
 
-When you run a test, copy the `.rmg.json` into
-`…\HeroesOldenEra_Data\StreamingAssets\map_templates\`, start a game on it, and report back what
-you observe — I can then turn the answers into confirmed documentation.
+To run a probe: copy its `.rmg.json` into `…\HeroesOldenEra_Data\StreamingAssets\map_templates\`
+and start a game on it. All bundled probes have been run and generate/play; the remaining open
+items are noted per-question below.
 
 ---
 
 ## A. Open questions
 
 ### Guard / value system
-1. **`guardValue` units.** *(Partially confirmed.)* `guardValue` is an abstract army-**value**
-   budget the generator fills with biome/faction-appropriate creatures — *not* a fixed count. Two
-   borders both at `guardValue: 10000` gave 20–49 Grolls (T3) vs. 50–99 Ra'Shoths (upg. T1) + 20–49
-   Votaries (upg. T2): same budget, different composition, counts inversely proportional to creature
-   tier. **Still open:** the absolute value-per-point scale (what total strength `10000` represents),
-   and whether `guardMultiplier`/`guardRandomization` apply before or after creature selection. Run
-   **Probe-Guards** (5000 vs 50000) to check the count scales ~10×.
+1. **`guardValue` units.** *(Resolved.)* `guardValue` is an abstract army-**value** budget the
+   generator fills with biome/faction-appropriate creatures — *not* a fixed count. Scaling is
+   **linear**: a 10× budget yields a ~10×-value army by jumping to a **higher-tier creature at a
+   similar count** (`5000` → 20–49 T1 Parasites vs `50000` → 20–49 upgraded-T7 Vampire Lords), and
+   once a top-tier stack tops out, larger budgets add **more stacks** (`200000` → two T7 stacks). Two
+   borders at the same value give comparable strength but different compositions (counts inversely
+   proportional to creature tier).
 2. **`guardCutoffValue`.** *(Resolved.)* It's the **minimum guard value to keep** — each content
    guard whose value is below it is dropped and the object left unguarded. A cutoff above the zone's
    content guard values removes *all* guards (a cutoff-30000 zone full of cheap guards had **no guards
@@ -360,19 +362,17 @@ present (so per-area alone works, area-scaled — it had *more* than the control
 (`value: 150000`) → guarded content present. Only the both-nonzero combination rule is left untested.
 
 ### Further tests you can author by editing the probes
-- **Q4 (reaction distribution):** clone Probe-Base, give `Center` `guardReactionDistribution`
-  `[100,0,0,0,0,0]` and a copy with `[0,0,0,0,0,100]`; compare guard behaviour/strength between
-  the two extremes.
-- **Q7 (`size`):** make one spawn `size: 0.5` and the other `size: 2.0`; compare zone areas.
+For the still-open items, edit `Doc-Probe-Base` (or a relevant probe) and vary one field:
+- **Q7 (`size`):** make one spawn `size: 0.5` and the other `size: 2.0`; compare zone areas. (Note:
+  large `size` may also affect content placement — see the Test 12 iteration notes.)
 - **Q12/Q13 (`Default`/`Proximity`):** change one connection's `connectionType` to `Default` and
   another map's to `Proximity`; check whether you can walk between the zones.
-- **Q20/Q21 (win conditions):** set `displayWinCondition` to `win_condition_2` and try each
-  `winConditions` flag (`heroLighting`, etc.) one at a time; report the in-game objective text.
-- **Q22/Q23 (sizes):** set `sizeX: 96, sizeZ: 160` (non-square) and `sizeX:sizeZ: 320`
+- **Q22/Q23 (sizes):** set `sizeX: 96, sizeZ: 160` (non-square) and `sizeX: 320, sizeZ: 320`
   (experimental); report whether generation succeeds.
+- **Both-nonzero budgets (Q5):** set both `guardedContentValue` and `guardedContentValuePerArea`
+  non-zero in one zone and compare to each alone — do they add, or does one override?
 
-> ⚠️ These probe templates are **unverified** — they're built to match the structure and pool
-> references of official templates, but no one has confirmed they generate in your game build yet.
-> If `Doc-Probe-Base` fails to load, the most likely cause is a content-pool ID that doesn't exist
-> in your version; tell me the error and I'll swap in pool IDs from a template you know works (or
-> inline a minimal pool once we confirm the inline `contentPools` schema).
+> All bundled probes have been run in-game and generate/play correctly; their confirmed findings are
+> recorded above. If you *edit* a probe (or regenerate after a game patch) and it fails to load, the
+> most likely cause is a content-pool ID that no longer exists in your build — note the error and
+> swap in pool IDs from a template known to work.
