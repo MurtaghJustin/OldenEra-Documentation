@@ -1,0 +1,846 @@
+{
+	"name": "Doc Probe Reaction Gradient",
+	"gameMode": "Classic",
+	"description": "templates_description_doc_probe_reaction_gradient",
+	"displayWinCondition": "win_condition_1",
+	"sizeX": 128,
+	"sizeZ": 128,
+	"gameRules": {
+		"heroCountMin": 4,
+		"heroCountMax": 8,
+		"heroCountIncrement": 1,
+		"heroHireBan": false,
+		"encounterHoles": false,
+		"winConditions": {
+			"classic": true
+		},
+		"bonuses": [
+			{
+				"sid": "add_bonus_hero_spell",
+				"receiverSide": -1,
+				"receiverFilter": "all_heroes",
+				"parameters": [
+					"neutral_magic_second_sight"
+				]
+			},
+			{
+				"sid": "add_bonus_hero_stat",
+				"receiverSide": -1,
+				"receiverFilter": "all_heroes",
+				"parameters": [
+					"magicCostSidSet",
+					"neutral_magic_second_sight",
+					"-999",
+					"0"
+				]
+			}
+		]
+	},
+	"variants": [
+		{
+			"orientation": {
+				"mode": "MinimalBoundingSquare",
+				"zeroAngleZone": "Spawn-A",
+				"baseAngleMin": 0,
+				"baseAngleMax": 360,
+				"randomAngleAmplitude": 0,
+				"randomAngleStep": 90
+			},
+			"border": {
+				"cornerRadius": 0.15,
+				"obstaclesWidth": 3,
+				"obstaclesNoise": [
+					{
+						"amp": 1,
+						"freq": 12
+					}
+				],
+				"waterWidth": 0,
+				"waterNoise": [
+					{
+						"amp": 1,
+						"freq": 12
+					}
+				],
+				"waterType": "water grass"
+			},
+			"zones": [
+				{
+					"name": "Spawn-A",
+					"size": 1.0,
+					"layout": "zone_layout_spawns",
+					"guardCutoffValue": 1500,
+					"guardRandomization": 0.05,
+					"guardMultiplier": 1.0,
+					"guardWeeklyIncrement": 0.1,
+					"guardReactionDistribution": [
+						60,
+						20,
+						10,
+						5,
+						2,
+						0
+					],
+					"guardedContentPool": [
+						"classic_template_pool_random_t2_base"
+					],
+					"unguardedContentPool": [
+						"classic_template_pool_random_unguarded_t2_base"
+					],
+					"resourcesContentPool": [
+						"content_pool_general_resources_start_zone_poor"
+					],
+					"mandatoryContent": [
+						"mandatory_content_spawn"
+					],
+					"contentCountLimits": [
+						"content_limits_spawn"
+					],
+					"guardedContentValue": 150000,
+					"unguardedContentValue": 50000,
+					"resourcesValue": 30000,
+					"mainObjects": [
+						{
+							"type": "Spawn",
+							"spawn": "Player1",
+							"removeGuardIfHasOwner": true,
+							"guardChance": 1.0,
+							"guardValue": 25000,
+							"guardWeeklyIncrement": 0.1,
+							"buildingsConstructionSid": "default_buildings_construction",
+							"placement": "Uniform"
+						}
+					],
+					"zoneBiome": {
+						"type": "MatchMainObject",
+						"args": [
+							"0"
+						]
+					},
+					"contentBiome": {
+						"type": "MatchMainObject",
+						"args": [
+							"0"
+						]
+					},
+					"metaObjectsBiome": {
+						"type": "MatchMainObject",
+						"args": [
+							"0"
+						]
+					},
+					"crossroadsPosition": 0,
+					"roads": [
+						{
+							"type": "Stone",
+							"from": {
+								"type": "MainObject",
+								"args": [
+									"0"
+								]
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"A-N1"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Spawn-B",
+					"size": 1.0,
+					"layout": "zone_layout_spawns",
+					"guardCutoffValue": 1500,
+					"guardRandomization": 0.05,
+					"guardMultiplier": 1.0,
+					"guardWeeklyIncrement": 0.1,
+					"guardReactionDistribution": [
+						60,
+						20,
+						10,
+						5,
+						2,
+						0
+					],
+					"guardedContentPool": [
+						"classic_template_pool_random_t2_base"
+					],
+					"unguardedContentPool": [
+						"classic_template_pool_random_unguarded_t2_base"
+					],
+					"resourcesContentPool": [
+						"content_pool_general_resources_start_zone_poor"
+					],
+					"mandatoryContent": [
+						"mandatory_content_spawn"
+					],
+					"contentCountLimits": [
+						"content_limits_spawn"
+					],
+					"guardedContentValue": 150000,
+					"unguardedContentValue": 50000,
+					"resourcesValue": 30000,
+					"mainObjects": [
+						{
+							"type": "Spawn",
+							"spawn": "Player2",
+							"removeGuardIfHasOwner": true,
+							"guardChance": 1.0,
+							"guardValue": 25000,
+							"guardWeeklyIncrement": 0.1,
+							"buildingsConstructionSid": "default_buildings_construction",
+							"placement": "Uniform"
+						}
+					],
+					"zoneBiome": {
+						"type": "MatchMainObject",
+						"args": [
+							"0"
+						]
+					},
+					"contentBiome": {
+						"type": "MatchMainObject",
+						"args": [
+							"0"
+						]
+					},
+					"metaObjectsBiome": {
+						"type": "MatchMainObject",
+						"args": [
+							"0"
+						]
+					},
+					"crossroadsPosition": 0,
+					"roads": [
+						{
+							"type": "Stone",
+							"from": {
+								"type": "MainObject",
+								"args": [
+									"0"
+								]
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"N4-B"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Neutral-Idx1",
+					"size": 1.0,
+					"layout": "zone_layout_treasure_zone",
+					"guardCutoffValue": 0,
+					"guardRandomization": 0.0,
+					"guardMultiplier": 1.0,
+					"guardWeeklyIncrement": 0.1,
+					"guardReactionDistribution": [
+						0,
+						1,
+						0,
+						0,
+						0,
+						0
+					],
+					"guardedContentPool": [
+						"classic_template_pool_random_t3_base"
+					],
+					"unguardedContentPool": [
+						"classic_template_pool_random_unguarded_t3_base"
+					],
+					"resourcesContentPool": [
+						"content_pool_general_resources_side_zone_poor"
+					],
+					"mandatoryContent": [
+						"mandatory_content_neutral"
+					],
+					"contentCountLimits": [
+						"content_limits_neutral"
+					],
+					"guardedContentValue": 250000,
+					"unguardedContentValue": 30000,
+					"resourcesValue": 30000,
+					"mainObjects": [
+						{
+							"type": "City",
+							"guardChance": 0.5,
+							"guardValue": 8000,
+							"guardWeeklyIncrement": 0.1,
+							"buildingsConstructionSid": "poor_buildings_construction",
+							"placement": "Center",
+							"faction": {
+								"type": "FromList",
+								"args": [
+									"differentFrom: 0 Spawn-A",
+									"differentFrom: 0 Spawn-B"
+								]
+							}
+						}
+					],
+					"zoneBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"contentBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"metaObjectsBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"crossroadsPosition": 1,
+					"roads": [
+						{
+							"type": "Stone",
+							"from": {
+								"type": "MainObject",
+								"args": [
+									"0"
+								]
+							},
+							"to": {
+								"type": "Crossroads"
+							}
+						},
+						{
+							"type": "Stone",
+							"from": {
+								"type": "Crossroads"
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"A-N1"
+								]
+							}
+						},
+						{
+							"type": "Stone",
+							"from": {
+								"type": "Crossroads"
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"N1-N2"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Neutral-Idx2",
+					"size": 1.0,
+					"layout": "zone_layout_treasure_zone",
+					"guardCutoffValue": 0,
+					"guardRandomization": 0.0,
+					"guardMultiplier": 1.0,
+					"guardWeeklyIncrement": 0.1,
+					"guardReactionDistribution": [
+						0,
+						0,
+						1,
+						0,
+						0,
+						0
+					],
+					"guardedContentPool": [
+						"classic_template_pool_random_t3_base"
+					],
+					"unguardedContentPool": [
+						"classic_template_pool_random_unguarded_t3_base"
+					],
+					"resourcesContentPool": [
+						"content_pool_general_resources_side_zone_poor"
+					],
+					"mandatoryContent": [
+						"mandatory_content_neutral"
+					],
+					"contentCountLimits": [
+						"content_limits_neutral"
+					],
+					"guardedContentValue": 250000,
+					"unguardedContentValue": 30000,
+					"resourcesValue": 30000,
+					"mainObjects": [
+						{
+							"type": "City",
+							"guardChance": 0.5,
+							"guardValue": 8000,
+							"guardWeeklyIncrement": 0.1,
+							"buildingsConstructionSid": "poor_buildings_construction",
+							"placement": "Center",
+							"faction": {
+								"type": "FromList",
+								"args": [
+									"differentFrom: 0 Spawn-A",
+									"differentFrom: 0 Spawn-B"
+								]
+							}
+						}
+					],
+					"zoneBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"contentBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"metaObjectsBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"crossroadsPosition": 1,
+					"roads": [
+						{
+							"type": "Stone",
+							"from": {
+								"type": "MainObject",
+								"args": [
+									"0"
+								]
+							},
+							"to": {
+								"type": "Crossroads"
+							}
+						},
+						{
+							"type": "Stone",
+							"from": {
+								"type": "Crossroads"
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"N1-N2"
+								]
+							}
+						},
+						{
+							"type": "Stone",
+							"from": {
+								"type": "Crossroads"
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"N2-N3"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Neutral-Idx3",
+					"size": 1.0,
+					"layout": "zone_layout_treasure_zone",
+					"guardCutoffValue": 0,
+					"guardRandomization": 0.0,
+					"guardMultiplier": 1.0,
+					"guardWeeklyIncrement": 0.1,
+					"guardReactionDistribution": [
+						0,
+						0,
+						0,
+						1,
+						0,
+						0
+					],
+					"guardedContentPool": [
+						"classic_template_pool_random_t3_base"
+					],
+					"unguardedContentPool": [
+						"classic_template_pool_random_unguarded_t3_base"
+					],
+					"resourcesContentPool": [
+						"content_pool_general_resources_side_zone_poor"
+					],
+					"mandatoryContent": [
+						"mandatory_content_neutral"
+					],
+					"contentCountLimits": [
+						"content_limits_neutral"
+					],
+					"guardedContentValue": 250000,
+					"unguardedContentValue": 30000,
+					"resourcesValue": 30000,
+					"mainObjects": [
+						{
+							"type": "City",
+							"guardChance": 0.5,
+							"guardValue": 8000,
+							"guardWeeklyIncrement": 0.1,
+							"buildingsConstructionSid": "poor_buildings_construction",
+							"placement": "Center",
+							"faction": {
+								"type": "FromList",
+								"args": [
+									"differentFrom: 0 Spawn-A",
+									"differentFrom: 0 Spawn-B"
+								]
+							}
+						}
+					],
+					"zoneBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"contentBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"metaObjectsBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"crossroadsPosition": 1,
+					"roads": [
+						{
+							"type": "Stone",
+							"from": {
+								"type": "MainObject",
+								"args": [
+									"0"
+								]
+							},
+							"to": {
+								"type": "Crossroads"
+							}
+						},
+						{
+							"type": "Stone",
+							"from": {
+								"type": "Crossroads"
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"N2-N3"
+								]
+							}
+						},
+						{
+							"type": "Stone",
+							"from": {
+								"type": "Crossroads"
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"N3-N4"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Neutral-Idx4",
+					"size": 1.0,
+					"layout": "zone_layout_treasure_zone",
+					"guardCutoffValue": 0,
+					"guardRandomization": 0.0,
+					"guardMultiplier": 1.0,
+					"guardWeeklyIncrement": 0.1,
+					"guardReactionDistribution": [
+						0,
+						0,
+						0,
+						0,
+						1,
+						0
+					],
+					"guardedContentPool": [
+						"classic_template_pool_random_t3_base"
+					],
+					"unguardedContentPool": [
+						"classic_template_pool_random_unguarded_t3_base"
+					],
+					"resourcesContentPool": [
+						"content_pool_general_resources_side_zone_poor"
+					],
+					"mandatoryContent": [
+						"mandatory_content_neutral"
+					],
+					"contentCountLimits": [
+						"content_limits_neutral"
+					],
+					"guardedContentValue": 250000,
+					"unguardedContentValue": 30000,
+					"resourcesValue": 30000,
+					"mainObjects": [
+						{
+							"type": "City",
+							"guardChance": 0.5,
+							"guardValue": 8000,
+							"guardWeeklyIncrement": 0.1,
+							"buildingsConstructionSid": "poor_buildings_construction",
+							"placement": "Center",
+							"faction": {
+								"type": "FromList",
+								"args": [
+									"differentFrom: 0 Spawn-A",
+									"differentFrom: 0 Spawn-B"
+								]
+							}
+						}
+					],
+					"zoneBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"contentBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"metaObjectsBiome": {
+						"type": "FromList",
+						"args": []
+					},
+					"crossroadsPosition": 1,
+					"roads": [
+						{
+							"type": "Stone",
+							"from": {
+								"type": "MainObject",
+								"args": [
+									"0"
+								]
+							},
+							"to": {
+								"type": "Crossroads"
+							}
+						},
+						{
+							"type": "Stone",
+							"from": {
+								"type": "Crossroads"
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"N3-N4"
+								]
+							}
+						},
+						{
+							"type": "Stone",
+							"from": {
+								"type": "Crossroads"
+							},
+							"to": {
+								"type": "Connection",
+								"args": [
+									"N4-B"
+								]
+							}
+						}
+					]
+				}
+			],
+			"connections": [
+				{
+					"name": "A-N1",
+					"from": "Spawn-A",
+					"to": "Neutral-Idx1",
+					"connectionType": "Direct",
+					"road": true,
+					"guardEscape": false,
+					"guardValue": 8000,
+					"guardWeeklyIncrement": 0.1
+				},
+				{
+					"name": "N1-N2",
+					"from": "Neutral-Idx1",
+					"to": "Neutral-Idx2",
+					"connectionType": "Direct",
+					"road": true,
+					"guardEscape": false,
+					"guardValue": 8000,
+					"guardWeeklyIncrement": 0.1
+				},
+				{
+					"name": "N2-N3",
+					"from": "Neutral-Idx2",
+					"to": "Neutral-Idx3",
+					"connectionType": "Direct",
+					"road": true,
+					"guardEscape": false,
+					"guardValue": 8000,
+					"guardWeeklyIncrement": 0.1
+				},
+				{
+					"name": "N3-N4",
+					"from": "Neutral-Idx3",
+					"to": "Neutral-Idx4",
+					"connectionType": "Direct",
+					"road": true,
+					"guardEscape": false,
+					"guardValue": 8000,
+					"guardWeeklyIncrement": 0.1
+				},
+				{
+					"name": "N4-B",
+					"from": "Neutral-Idx4",
+					"to": "Spawn-B",
+					"connectionType": "Direct",
+					"road": true,
+					"guardEscape": false,
+					"guardValue": 8000,
+					"guardWeeklyIncrement": 0.1
+				}
+			]
+		}
+	],
+	"zoneLayouts": [
+		{
+			"name": "zone_layout_spawns",
+			"obstaclesFill": 0.55,
+			"obstaclesFillVoid": 0.55,
+			"lakesFill": 0.3,
+			"minLakeArea": 12,
+			"elevationClusterScale": 0.128,
+			"elevationModes": [
+				{
+					"weight": 1,
+					"minElevatedFraction": 0.0,
+					"maxElevatedFraction": 0.0
+				}
+			],
+			"roadClusterArea": 128,
+			"guardedEncounterResourceFractions": {
+				"countBounds": [],
+				"fractions": [
+					0.66
+				]
+			},
+			"ambientPickupDistribution": {
+				"repulsion": 1.0,
+				"noise": 0.3,
+				"roadAttraction": 0.5,
+				"obstacleAttraction": 0.0,
+				"groupSizeWeights": [
+					4,
+					1,
+					1
+				]
+			}
+		},
+		{
+			"name": "zone_layout_treasure_zone",
+			"obstaclesFill": 0.5,
+			"obstaclesFillVoid": 0.5,
+			"lakesFill": 0.3,
+			"minLakeArea": 10,
+			"elevationClusterScale": 0.128,
+			"elevationModes": [
+				{
+					"weight": 1,
+					"minElevatedFraction": 0.0,
+					"maxElevatedFraction": 0.0
+				}
+			],
+			"roadClusterArea": 128,
+			"guardedEncounterResourceFractions": {
+				"countBounds": [],
+				"fractions": [
+					0.5
+				]
+			},
+			"ambientPickupDistribution": {
+				"repulsion": 1.0,
+				"noise": 0.3,
+				"roadAttraction": 0.25,
+				"obstacleAttraction": 0.0,
+				"groupSizeWeights": [
+					4,
+					1,
+					1
+				]
+			}
+		}
+	],
+	"mandatoryContent": [
+		{
+			"name": "mandatory_content_spawn",
+			"content": [
+				{
+					"sid": "mine_wood",
+					"isMine": true,
+					"isGuarded": false
+				},
+				{
+					"sid": "mine_ore",
+					"isMine": true,
+					"isGuarded": false
+				},
+				{
+					"sid": "mine_gold",
+					"isMine": true
+				},
+				{
+					"includeLists": [
+						"content_list_building_random_hires_low_tier"
+					]
+				},
+				{
+					"includeLists": [
+						"content_list_building_random_hires_high_tier"
+					]
+				}
+			]
+		},
+		{
+			"name": "mandatory_content_neutral",
+			"content": [
+				{
+					"includeLists": [
+						"basic_content_list_building_guarded_resource_banks_tier_2"
+					]
+				},
+				{
+					"includeLists": [
+						"basic_content_list_building_guarded_resource_banks_tier_2"
+					]
+				},
+				{
+					"includeLists": [
+						"basic_content_list_building_guarded_units_banks_only_biome_restriction"
+					]
+				},
+				{
+					"sid": "mine_gold",
+					"isMine": true
+				}
+			]
+		}
+	],
+	"contentCountLimits": [
+		{
+			"name": "content_limits_spawn",
+			"limits": [
+				{
+					"sid": "stables",
+					"maxCount": 1
+				}
+			]
+		},
+		{
+			"name": "content_limits_neutral",
+			"limits": [
+				{
+					"sid": "stables",
+					"maxCount": 1
+				}
+			]
+		}
+	],
+	"contentPools": [],
+	"contentLists": []
+}
