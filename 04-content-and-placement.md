@@ -113,8 +113,15 @@ they contain, e.g. `content_list_building_random_hires_high_tier`,
 ## Mandatory content
 
 Root `mandatoryContent` is an array of **named groups**. A zone opts into a group by listing its
-name in the zone's `mandatoryContent` array; every item in the group is then guaranteed to spawn
-in that zone.
+name in the zone's `mandatoryContent` array; every item in the group is then placed in that zone.
+
+> **Guaranteed, but guarded mandatory items still need budget (observed).** Mandatory content is
+> normally guaranteed, **but guarded mandatory objects appear to draw on the zone's
+> `guardedContentValue` budget** — six guarded `tree_of_abundance` items placed fine with a
+> `300000` budget but **vanished entirely when the budget was dropped to `20000`** (too small to
+> fund their guards). So if a zone's guarded budget is too low to fund a guarded mandatory item's
+> guard, that item can be dropped. (Set `isGuarded: false` to place an item irrespective of the
+> guarded budget, or ensure the budget is large enough.)
 
 ```jsonc
 {

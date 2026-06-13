@@ -19,7 +19,7 @@ The root is a single JSON object. Keys (in the order they conventionally appear)
 | `name` | string | ✔ | Internal template name. Often a localization key for the display name is **not** here — see `description`. |
 | `gameMode` | string | ✔ | `"Classic"` or `"SingleHero"`. See below. |
 | `description` | string | – | A **localization key** (e.g. `"templates_description_symmetry"`), not literal text. The game resolves it to localized copy. |
-| `displayWinCondition` | string | – | A `win_condition_N` ID controlling the **label/icon** shown in the picker. The *actual* rules live in `gameRules.winConditions`. See [02](02-game-rules-and-win-conditions.md). |
+| `displayWinCondition` | string | – | A `win_condition_N` ID selecting the **headline victory condition** — its in-game name **and** (at least for some IDs) its actual mechanic: e.g. `win_condition_2` = "Capital Capture" really requires capturing the enemy capital. Additional/secondary conditions come from `gameRules.winConditions`. See [02](02-game-rules-and-win-conditions.md). |
 | `sizeX` | int | ✔ | Map width in tiles. |
 | `sizeZ` | int | ✔ | Map height in tiles. (`Z` is the second horizontal axis; maps are square in every official template, `sizeX == sizeZ`.) |
 | `gameRules` | object | ✔ | Hero counts, bans, win conditions, start bonuses. See [02](02-game-rules-and-win-conditions.md). |

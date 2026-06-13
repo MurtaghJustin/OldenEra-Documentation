@@ -71,11 +71,11 @@ These shape how strongly content inside the zone is defended.
 
 | Field | Type | Meaning |
 |-------|------|---------|
-| `guardCutoffValue` | int | Guard-strength threshold. **[editor-inferred]** Guards whose computed value falls below this are dropped (content left unguarded). Observed: 0, 1000, 1500 (most common), 2000–3500. |
-| `guardRandomization` | double | Random ± fraction applied to guard values (e.g. `0.05` = ±5%). |
-| `guardMultiplier` | double | Scales all guard values in the zone (e.g. `0.85`, `1.0`). |
-| `guardWeeklyIncrement` | double | Weekly growth fraction of guards (e.g. `0.10`–`0.15`). |
-| `guardReactionDistribution` | int[6] | Six weights controlling the **distribution of guard reaction tiers** (disposition / aggression buckets). Higher index = ... **[exact bucket meaning unknown — see 06]**. Examples: `[60,20,10,5,2,0]`, `[1,1,4,4,2,1]`, `[3,2,0,0,0,0]`. |
+| `guardCutoffValue` | int | **Minimum guard value to keep (confirmed).** Any content guard whose computed value falls below this is **dropped entirely** — the object is left unguarded. A cutoff set above the zone's content guard values removes *all* guards (the zone becomes fully unguarded). Hence the common `1500` strips trivial sub-1500 guards. Observed: 0, 1000, 1500 (most common), 2000–3500. |
+| `guardRandomization` | double | Random ± fraction applied to guard values (e.g. `0.05` = ±5%). Official templates use `0.05`–`0.25`; **stay within that range** — a test at `0.5` (double the max) caused guarded objects to go missing from the zone. Exact spread behavior still being measured. |
+| `guardMultiplier` | double | Scales the zone's **content** guard values (confirmed: a ×2.0 zone's guards were far stronger than an otherwise-identical ×0.5 zone). Does **not** affect border/connection guards. E.g. `0.85`, `1.0`. |
+| `guardWeeklyIncrement` | double | **Compounding** weekly growth fraction (confirmed): each week the guard value is multiplied by `(1 + increment)`. With `1.0` the guard **doubled every week** (1× → 2× → 4×). So `0.10` = +10% compounding per week. The same field on connections and main objects behaves the same way. |
+| `guardReactionDistribution` | int[6] | Six weights distributing the zone's **content/object guards** across six **disposition** tiers (index `0` = least aggressive → index `5` = friendliest). The *realised* reaction still resolves against relative army strength as normal: index-0 guards **flee only when the hero overwhelmingly outmatches them, and fight otherwise**; index-5 guards **offer to join**. Sets disposition, not guard strength, and does **not** affect border/connection guards (those always fight). Middle indices `1`–`4` unconfirmed. Examples: `[60,20,10,5,2,0]`, `[1,1,4,4,2,1]`, `[3,2,0,0,0,0]`. |
 
 > **Guard value is an army-*value* budget (confirmed in-game).** A guard's `guardValue` (here and
 > on connections/main objects) is an abstract value the generator fills with creatures appropriate
@@ -92,6 +92,28 @@ These shape how strongly content inside the zone is defended.
 > **upgraded-T7 Vampire Lords** (same count band, ~10× per-head value). Once a single top-tier stack
 > tops out, larger budgets add **more stacks**: a `200000` guard appeared as **two** 20–49 T7 stacks
 > (one upgraded, one base).
+
+> **`guardReactionDistribution` is a friendliness/disposition ladder for the zone's content guards
+> (confirmed in-game).** Each guard is assigned a tier drawn from the six weighted buckets
+> (index `0` = least friendly → index `5` = friendliest). The tier does **not** set guard strength,
+> and **border/connection guards ignore it entirely — they always Fight.**
+>
+> The game only ever displays three reaction values — **Will Fight / Will Flee / Will Join** —
+> viewable via a reveal spell and computed for the **viewing hero's army**. How a tier resolves to
+> one of those three:
+> - **Strength matters:** the more a hero outpowers a guard, the more it shifts away from *Fight*
+>   toward *Flee* (no Diplomacy) or *Join* (with Diplomacy). A weak hero gets *Fight* at any tier.
+> - **Diplomacy gates joining for tiers 0–4:** with the **Diplomacy** skill, guards on these tiers
+>   can *Join* once the hero's army is overwhelming enough (a higher tier joins at a smaller
+>   advantage). **Without Diplomacy, tiers 0–4 never Join** — only Fight or Flee — *no matter how
+>   large the army.*
+> - **Tier 5 is the "free-join" tier:** index-5 guards offered to **Join even without Diplomacy**.
+>
+> So a guard's tier governs *how readily it flees/joins* and *whether joining needs Diplomacy*, while
+> the final Fight/Flee/Join is computed against the viewing hero (army + Diplomacy). This also
+> explains why official templates weight the low indices (e.g. `[60,20,10,5,2,0]`) — those are
+> ordinary guards that fight unless heavily outmatched and won't join a Diplomacy-less hero.
+> *(Still unmapped: the exact army-advantage threshold separating tiers 1–4 from one another.)*
 
 ### Content budgets & pools
 
@@ -262,7 +284,7 @@ Edges of the zone graph. Each connection joins two zones by name.
 | `guardEscape` | bool | Whether the border guard can be bypassed/escaped **[meaning unverified — see 06]**. |
 | `simTurnSquad` | bool | Treat the guard as a "simulated-turn squad" that reacts to nearby heroes **[editor-inferred]**. |
 | `guardValue` | int | Strength of the border guard army. |
-| `guardWeeklyIncrement` | double | Weekly growth fraction of the border guard. |
+| `guardWeeklyIncrement` | double | Compounding weekly growth of the border guard — ×`(1 + increment)` per week (confirmed; see zone field). |
 | `guardZone` | string | Which of the two zones "owns"/hosts the guard. |
 | `guardMatchGroup` | string | Names a group of connections whose guards are kept **identical** (for mirrored balance, e.g. `"hub_guard_A"`, `"graph_guard_Graph-1"`). |
 | `gatePlacement` | string | Where a gate is placed on the connection. Only known value: `"Center"`. |

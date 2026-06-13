@@ -37,7 +37,7 @@ game supports.
 | ID | Label |
 |----|-------|
 | `win_condition_1` | Standard |
-| `win_condition_2` | *(unknown — unused by official templates)* |
+| `win_condition_2` | **Capital Capture** *(confirmed in-game; unused by official templates)* |
 | `win_condition_3` | Lost Starting City |
 | `win_condition_4` | Gladiator Arena *(editor label, commented out in source)* |
 | `win_condition_5` | Hold City |

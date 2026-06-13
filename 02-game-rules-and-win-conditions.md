@@ -44,7 +44,7 @@ parameterise it.
 | `desertion` | bool | Enables an army-desertion mechanic. |
 | `desertionDay` | int | Day desertion checks begin. |
 | `desertionValue` | int | Threshold (army value) governing desertion. |
-| `heroLighting` | bool | Enables "hero lighting" (spelled this way in data). **[unknown — see 06]** likely a hero highlight/visibility or a lightning-strike loss condition. |
+| `heroLighting` | bool | Spelled this way in the data. **Near-universal baseline flag** — set `true` (with `heroLightingDay: 1`) in *every* official template, in both Classic and SingleHero. Toggling it on in a controlled 2-player Classic Standard game produced **no observable effect** vs. off, so it's likely a baseline rule (e.g. the standard "lose with no hero/town" elimination, with `heroLightingDay` a grace/check day) rather than a special win condition. Precise effect undetermined — see [06 Q21](06-open-questions-and-tests.md). |
 | `heroLightingDay` | int | Day the above activates. |
 | `lostStartCity` | bool | Player loses if their starting city is captured. |
 | `lostStartCityDay` | int | Grace day before that applies. |
@@ -65,20 +65,26 @@ parameterise it.
 
 ### `displayWinCondition` vs `winConditions`
 
-`displayWinCondition` (a root field, see [01](01-root-and-structure.md)) only selects the
-**label/icon** in the template picker. The mechanically-enforced rules come from the
-`winConditions` object. Known display IDs:
+`displayWinCondition` (a root field, see [01](01-root-and-structure.md)) selects the **headline
+victory condition** — and, contrary to the field name, it can set the actual **mechanic**, not just
+a label: `win_condition_2` ("Capital Capture") genuinely requires capturing the enemy capital to win
+(in SingleHero mode, killing the enemy's only hero also wins). The `winConditions` object then layers
+on additional/secondary conditions (desertion, lost-city/hero, hold-city, tournament, etc.). *(The
+game has no separate objectives panel; the win condition shows as a name like "Capital Capture".)*
+Known display IDs:
 
-| ID | Editor label | Used by (count) |
-|----|--------------|-----------------|
+| ID | Label | Used by (count) |
+|----|-------|-----------------|
 | `win_condition_1` | Standard | 29 |
+| `win_condition_2` | **Capital Capture** — must capture the enemy capital to win (SingleHero: killing their only hero also wins). *Confirmed in-game; unused by official templates.* | 0 |
 | `win_condition_3` | Lost Starting City | 18 |
 | `win_condition_4` | Gladiator Arena **[editor-inferred; label commented out in source]** | 4 |
 | `win_condition_5` | Hold City | 5 |
 | `win_condition_6` | Tournament | 5 |
 
-`win_condition_2` does not appear in any official template and its label is unknown
-(see [06](06-open-questions-and-tests.md)).
+*(Confirmed by isolation: with `displayWinCondition: win_condition_1` + `heroLighting: true`, play was
+plain Standard with **no** capital requirement — so Capital Capture comes from `win_condition_2`, not
+`heroLighting`.)*
 
 ## `globalBans`
 

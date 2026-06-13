@@ -20,19 +20,35 @@ you observe — I can then turn the answers into confirmed documentation.
    tier. **Still open:** the absolute value-per-point scale (what total strength `10000` represents),
    and whether `guardMultiplier`/`guardRandomization` apply before or after creature selection. Run
    **Probe-Guards** (5000 vs 50000) to check the count scales ~10×.
-2. **`guardCutoffValue`.** Confirm it's the threshold below which a guard is dropped (content left
-   unguarded). What exactly is compared against it — the per-object guard value, or the zone budget?
-3. **`guardMultiplier` vs `guardRandomization` vs `guardWeeklyIncrement`.** Confirm multiplier
-   scales final guard value, randomization is the ± spread, and weekly increment grows guards over
-   time. Is weekly increment compounding or linear?
-4. **`guardReactionDistribution` (the 6-int array).** What do the six buckets mean? Hypothesis:
-   creature *disposition/aggression* tiers (how likely guards are to fight vs. let you pass, or
-   reward-vs-threat banding). Which index is "weakest/most passive" and which is "strongest"?
+2. **`guardCutoffValue`.** *(Resolved.)* It's the **minimum guard value to keep** — each content
+   guard whose value is below it is dropped and the object left unguarded. A cutoff above the zone's
+   content guard values removes *all* guards (a cutoff-30000 zone full of cheap guards had **no guards
+   at all**). The common `1500` strips trivial sub-1500 guards.
+3. **`guardMultiplier` vs `guardRandomization` vs `guardWeeklyIncrement`.** *(Mostly resolved.)*
+   `guardMultiplier` scales the zone's **content** guard values (a ×2.0 zone ≫ an otherwise-identical
+   ×0.5 zone) and does **not** affect border/connection guards. `guardWeeklyIncrement` is
+   **compounding** — ×`(1 + increment)` per week (`1.0` doubled the guard each week: 1×→2×→4×).
+   **Still open (minor):** `guardRandomization` (the ± spread — set to 0 in the probes, not yet
+   measured).
+4. **`guardReactionDistribution` (the 6-int array).** *(Largely resolved.)* Six weights assigning
+   each of a zone's **content guards** a friendliness/disposition tier (index `0` = least friendly →
+   `5` = friendliest); it does not set strength, and **border guards ignore it (always Fight)**. The
+   game shows only **Will Fight / Will Flee / Will Join** (via a reveal spell, vs the viewing hero's
+   army). Resolution rules, confirmed by testing:
+   - More hero overpower → shifts from Fight toward Flee (no Diplomacy) / Join (with Diplomacy).
+   - **Tiers 0–4 require Diplomacy to Join** — *without* Diplomacy they never join, even with an
+     absurdly large army (only Fight/Flee). A higher tier joins at a smaller army advantage.
+   - **Tier 5 joins even without Diplomacy** ("free-join").
+   - "Mixed" reactions within one zone = per-object guard-size differences vs the hero.
+   **Minor remainder:** the precise army-advantage threshold separating tiers 1–4 from each other
+   (they behave similarly — all Diplomacy-gated — differing only in how easily they flip to Join).
 5. **Content value budgets.** *(Partially confirmed.)* Non-zero `guardedContentValue` produces
    guarded content as expected (a zone on `…_t4_base` with `guardedContentValue: 300000` yielded a
-   Dragon Utopia + an assorted mix of guarded buildings). **Still open:** the both-`0` case (as in
-   *Symmetry*) — does any guarded content spawn then? — and the precedence between the absolute and
-   per-area budgets when both are non-zero.
+   Dragon Utopia + an assorted mix of guarded buildings). Also observed: **guarded *mandatory*
+   content is gated by this budget** — six guarded mandatory objects placed at `300000` but vanished
+   entirely at `20000`, so a too-small guarded budget drops even mandatory guarded items. **Still
+   open:** the both-`0` case (as in *Symmetry*) — does any guarded content spawn then? — and the
+   precedence between the absolute and per-area budgets when both are non-zero.
 6. **`valueOverrides`.** *(Confirmed.)* Overrides work, **but `variant` must match the object's
    concrete variant — `-1` is not a wildcard here.** With `variant: -1` the override did nothing;
    re-keyed to the object's concrete `variant: 0` it raised the guard to ~20× the surrounding
@@ -77,8 +93,20 @@ you observe — I can then turn the answers into confirmed documentation.
     `FromList` args).
 
 ### Rules / root
-20. **`win_condition_2`.** What is it? (Unused by official templates.)
-21. **`heroLighting` / `heroLightingDay`.** What does this win condition do (note the spelling)?
+20. **`win_condition_2`.** *(Resolved.)* = **"Capital Capture"**, and it **changes the win
+    mechanic** — you must capture the enemy capital to win (SingleHero: killing the enemy's only hero
+    also wins). So `displayWinCondition` is not label-only; it selects the actual headline victory
+    condition. Confirmed by isolation (Test 8): `win_condition_1` + `heroLighting` gave plain Standard
+    play with no capital requirement, so the mechanic is `win_condition_2`'s. The game has **no
+    separate objectives panel**; the condition shows as a name.
+21. **`heroLighting` / `heroLightingDay`.** *(Largely settled.)* It's a **near-universal baseline
+    flag** — `true` with `heroLightingDay: 1` in **every** official template (Classic and SingleHero).
+    Isolating it (Test 8: `win_condition_1` + `heroLighting` only) produced **no observable effect**
+    vs. a map without it — no events, reveals, or rule changes. So it is almost certainly a baseline
+    rule that's effectively always-on (plausibly the standard "lose with no hero/town" elimination,
+    `heroLightingDay` being a grace/check day), not a special mechanic. **Minor remainder:** its exact
+    function — could be probed by a long game where a player is reduced to no hero/town with vs.
+    without it, but low priority.
 22. **Non-square maps.** Does `sizeX != sizeZ` generate correctly? No official template uses it.
 23. **Experimental sizes > 240.** Do sizes up to 512 generate playable maps?
 24. **Multiple `variants`.** Confirm exactly one variant is chosen per game (vs. combined), and
@@ -170,6 +198,125 @@ the neutral next to Player 2** (you can read player slots even though zone names
 
 If the two extremes look identical in-game, try intermediate buckets (e.g. `[0,0,100,0,0,0]`) to
 find which index changes what.
+
+**✓ Confirmed by this probe:** index `0` = least-aggressive disposition (guards **fled** vs. an
+overwhelming hero but **fought** a smaller army), index `5` = friendliest (**offered to join**, even
+without Diplomacy); guard sizes stayed similar (disposition ≠ strength) and border guards always
+Fight. Middle indices 1–4 still to be mapped (Test 6).
+
+### Test 6 — reaction gradient (middle buckets) — [`Doc-Probe-Reaction-Gradient.rmg.json`](test-templates/Doc-Probe-Reaction-Gradient.rmg.json)
+Finishes **Q4**. A 2-player **chain** `Spawn-A — Idx1 — Idx2 — Idx3 — Idx4 — Spawn-B`, where the four
+neutral zones are identical except each uses a **single-bucket** `guardReactionDistribution`:
+`Idx1 = [0,1,0,0,0,0]`, `Idx2 = [0,0,1,0,0,0]`, `Idx3 = [0,0,0,1,0,0]`, `Idx4 = [0,0,0,0,1,0]`.
+
+**Walking from Player 1 toward Player 2, the neutral zones are in index order 1 → 2 → 3 → 4.**
+
+The game only ever shows **three** reaction values — **Will Fight / Will Flee / Will Join** —
+viewable via a reveal spell and computed for the **viewing hero's army**. So the six buckets are
+disposition *tiers* mapping onto those three outcomes through an army-strength threshold, not six
+distinct labels. The probe **grants a vision spell free to all heroes** (best-guess: Second Sight)
+so the value is always viewable; if your game's reveal spell differs, cast that instead.
+
+**Observe & report:** with the **same hero/army**, view each of the four zones' object guards and
+note Fight / Flee / Join. Then **repeat with a much stronger (or weaker) army** — the tiers differ
+by *where* their Fight↔Flee↔Join threshold sits, so one army strength only shows a slice. Combined
+with the endpoints (0 = least aggressive, 5 = friendliest/join) this orders the 1–4 tiers. Also note
+whether **Diplomacy** changes the higher buckets.
+
+**✓ Confirmed by this probe:** tiers 1–4 **require Diplomacy to Join** — a non-Diplomacy hero gets
+no joins anywhere on the map even with an absurd army (only Fight/Flee); with Diplomacy, the more
+the hero overpowers a guard the more it leans Join over Flee (at Idx2, a big enough Diplomacy army
+made everything join). Only tier 5 joins without Diplomacy. The fine threshold ordering among 1–4
+was not separately resolved.
+
+### Test 7 — win-condition labels & effects — [`Doc-Probe-WinCon.rmg.json`](test-templates/Doc-Probe-WinCon.rmg.json)
+Probes **Q20/Q21**. Based on Probe-Base but with `displayWinCondition: "win_condition_2"` and
+`winConditions.heroLighting: true` (`heroLightingDay: 1`).
+
+**Observe & report:**
+- In the **template picker**, what label/icon does `win_condition_2` show? (**Q20**)
+- **In-game**, what objective/victory text does enabling `heroLighting` produce — what does the
+  condition actually do, and note the spelling the UI uses (the data says "heroLighting")? (**Q21**)
+- To map the rest, edit `displayWinCondition` through the other IDs (`win_condition_1/3/4/5/6`) and
+  note each picker label, and toggle other `winConditions` flags one at a time.
+
+### Test 8 — isolate `heroLighting` — [`Doc-Probe-HeroLighting.rmg.json`](test-templates/Doc-Probe-HeroLighting.rmg.json)
+Disambiguates Q20/Q21. Identical to Probe-Base but with `displayWinCondition: "win_condition_1"`
+(Standard headline — **not** Capital Capture) and `winConditions.heroLighting: true`
+(`heroLightingDay: 1`). `heroLighting` is now the only special flag.
+
+**Observe & report:**
+- Is the win condition **no longer "Capital Capture"** / no longer requiring you to take the enemy
+  capital? If so, that mechanic belonged to `win_condition_2` (confirms Q20 cleanly).
+- What does **`heroLighting` actually do** in play — any day-1 message, a hero-related win/loss
+  rule, or no observable effect? (**Q21**)
+
+**✓ Confirmed by this probe:** win condition was plain **Standard** (take all enemy towns + kill all
+heroes), **no** capital requirement → Capital Capture is `win_condition_2`'s mechanic (closes Q20).
+`heroLighting` showed **no observable effect** — and it's set in every official template, so it reads
+as an always-on baseline flag rather than a special condition (Q21).
+
+### Test 9 — `guardMultiplier` — [`Doc-Probe-GuardMultiplier.rmg.json`](test-templates/Doc-Probe-GuardMultiplier.rmg.json)
+Chain `Spawn-A — Neutral-A — Neutral-B — Spawn-B`. The two neutral zones are identical
+(`guardedContentValue: 200000`, same pool, `guardRandomization: 0`) except **`guardMultiplier`**:
+`Neutral-A = 0.5`, `Neutral-B = 2.0` (a 4× ratio). Neutral-A is next to Player 1, Neutral-B next to
+Player 2.
+
+**Observe & report:** compare the **in-zone content guards** between the two zones — are
+Neutral-B's guards roughly **4× stronger** than Neutral-A's (confirming `guardMultiplier` linearly
+scales zone guard values)? Also note whether the **border guards** differ (they shouldn't —
+`guardMultiplier` is a zone field; borders were left equal) so we learn whether it touches
+connection guards. (**Q3**)
+
+**✓ Confirmed:** the ×2.0 zone's content guards were far stronger than the ×0.5 zone's, and the
+equal border guards stayed equal — `guardMultiplier` scales content guards only, not connection guards.
+
+### Test 10 — `guardCutoffValue` — [`Doc-Probe-GuardCutoff.rmg.json`](test-templates/Doc-Probe-GuardCutoff.rmg.json)
+Same chain; both neutral zones use a **cheap pool** (`…_t1_base`) so they fill with many small
+guarded objects. Only **`guardCutoffValue`** differs: `Neutral-A = 0` (keep every guard),
+`Neutral-B = 30000` (hypothesis: drop any guard whose value falls below the cutoff).
+
+**Observe & report:** does **Neutral-B have noticeably more *unguarded* / freely-walkable objects**
+than Neutral-A (i.e. small guards removed)? Or does the cutoff do something else (e.g. remove the
+*objects* rather than just their guards, or merge small guards into bigger ones)? Roughly how many
+guarded vs unguarded objects in each zone? (**Q2**)
+
+**✓ Confirmed:** the cutoff-30000 zone (cheap `t1` guards, all below the threshold) ended up with
+**no guards at all** — confirming `guardCutoffValue` drops every guard below its value, leaving those
+objects unguarded.
+
+### Test 11 — `guardWeeklyIncrement` — [`Doc-Probe-GuardWeekly.rmg.json`](test-templates/Doc-Probe-GuardWeekly.rmg.json)
+Same chain. `Neutral-A` (and its border) have `guardWeeklyIncrement: 0.0`; `Neutral-B` (and its
+border) have `1.0` (= +100% per week). Both borders start at `guardValue: 20000`.
+
+**Observe & report:** record the **border guard size** (and an in-zone guard) for **Neutral-A vs
+Neutral-B** on **day 1, day ~8 (start of week 2), and day ~15 (week 3)**. Neutral-A is the control
+(no growth). For Neutral-B, the *pattern* tells us compounding vs linear:
+- **Compounding** (×2 each week): week1 → week2 → week3 ≈ 1× → 2× → 4×.
+- **Linear** (+100% of base each week): ≈ 1× → 2× → 3×.
+Note which it looks like (count bands are fine), and whether the increment hits week boundaries or
+accrues daily. (**Q3**)
+
+**✓ Confirmed:** the guard **doubled each week** (1× → 2× → 4×) with `guardWeeklyIncrement: 1.0` —
+so it's **compounding**: ×`(1 + increment)` per week.
+
+### Test 12 — `guardRandomization` — [`Doc-Probe-GuardRandomization.rmg.json`](test-templates/Doc-Probe-GuardRandomization.rmg.json)
+Same chain. Both neutral zones are identical (`guardMultiplier: 1.0`, larger `size`, low pool value
+so they place cleanly) and each gets **six copies of the same guarded object** (`tree_of_abundance`,
+variant 0). Only **`guardRandomization`** differs: `Neutral-A = 0.0`, `Neutral-B = 0.25` (±25%, the
+maximum value any official template uses).
+
+**Observe & report:** view the guard on each of the six identical objects in both zones.
+- In **Neutral-A** (0.0) the six guards should all be **the same size**.
+- In **Neutral-B** (0.25) do their sizes **vary** (a spread of roughly ±25%)? Note smallest vs largest.
+This confirms `guardRandomization` is a per-guard ± spread. (**Q3**)
+
+> **Iteration notes:** (1) an early version used `0.5` (double the official max `0.25`) and the 0.5
+> zone had no Arborcopias. (2) Lowering `guardedContentValue` to `20000` to "reduce clutter" then
+> removed the Arborcopias from **both** zones — guarded mandatory content is gated by that budget.
+> The probe now uses `guardRandomization` `0.0`/`0.25` with `guardedContentValue: 300000` so the six
+> objects place. RMG placement still varies per generation — if a zone lacks the six, **regenerate
+> once or twice** before concluding.
 
 ### Further tests you can author by editing the probes
 - **Q4 (reaction distribution):** clone Probe-Base, give `Center` `guardReactionDistribution`
