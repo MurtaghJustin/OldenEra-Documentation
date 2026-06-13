@@ -28,8 +28,10 @@ you observe — I can then turn the answers into confirmed documentation.
    `guardMultiplier` scales the zone's **content** guard values (a ×2.0 zone ≫ an otherwise-identical
    ×0.5 zone) and does **not** affect border/connection guards. `guardWeeklyIncrement` is
    **compounding** — ×`(1 + increment)` per week (`1.0` doubled the guard each week: 1×→2×→4×).
-   **Still open (minor):** `guardRandomization` (the ± spread — set to 0 in the probes, not yet
-   measured).
+   `guardRandomization` is a **per-guard ± spread** on guard values (confirmed: `0.25` gave clearly
+   varied guard sizes across six identical objects vs. uniform at `0.0`). So the whole trio is
+   resolved. (Keep `guardRandomization` ≤ `0.25` — the official max; a `0.5` test broke content
+   placement.)
 4. **`guardReactionDistribution` (the 6-int array).** *(Largely resolved.)* Six weights assigning
    each of a zone's **content guards** a friendliness/disposition tier (index `0` = least friendly →
    `5` = friendliest); it does not set strength, and **border guards ignore it (always Fight)**. The
@@ -44,11 +46,17 @@ you observe — I can then turn the answers into confirmed documentation.
    (they behave similarly — all Diplomacy-gated — differing only in how easily they flip to Join).
 5. **Content value budgets.** *(Partially confirmed.)* Non-zero `guardedContentValue` produces
    guarded content as expected (a zone on `…_t4_base` with `guardedContentValue: 300000` yielded a
-   Dragon Utopia + an assorted mix of guarded buildings). Also observed: **guarded *mandatory*
-   content is gated by this budget** — six guarded mandatory objects placed at `300000` but vanished
-   entirely at `20000`, so a too-small guarded budget drops even mandatory guarded items. **Still
-   open:** the both-`0` case (as in *Symmetry*) — does any guarded content spawn then? — and the
-   precedence between the absolute and per-area budgets when both are non-zero.
+   Dragon Utopia + an assorted mix of guarded buildings). **Open:** the both-`0` case (as in
+   *Symmetry*) — does any guarded content spawn then? — and the precedence between the absolute and
+   per-area budgets when both are non-zero. **Mostly resolved:** both-zero (`value: 0` +
+   `perArea: 0`, pool referenced) produced **no guarded content** — only mandatory/explicit objects
+   (how *Symmetry* runs on all-zero values). Each budget **alone** produces content: absolute works,
+   and **`guardedContentValuePerArea` alone also works, scaling with zone area** (a `perArea: 2000`
+   zone yielded *more* than a `value: 150000` zone). **Still open (minor):** how absolute + per-area
+   combine when both are non-zero (add vs. override). *(Note: a suspected
+   "guarded mandatory content needs budget" effect was **not** confirmed — raising the budget back up
+   did not restore dropped guarded mandatory objects, so that disappearance had another cause; see
+   Test 12 notes.)*
 6. **`valueOverrides`.** *(Confirmed.)* Overrides work, **but `variant` must match the object's
    concrete variant — `-1` is not a wildcard here.** With `variant: -1` the override did nothing;
    re-keyed to the object's concrete `variant: 0` it raised the guard to ~20× the surrounding
@@ -311,12 +319,45 @@ maximum value any official template uses).
 - In **Neutral-B** (0.25) do their sizes **vary** (a spread of roughly ±25%)? Note smallest vs largest.
 This confirms `guardRandomization` is a per-guard ± spread. (**Q3**)
 
-> **Iteration notes:** (1) an early version used `0.5` (double the official max `0.25`) and the 0.5
-> zone had no Arborcopias. (2) Lowering `guardedContentValue` to `20000` to "reduce clutter" then
-> removed the Arborcopias from **both** zones — guarded mandatory content is gated by that budget.
-> The probe now uses `guardRandomization` `0.0`/`0.25` with `guardedContentValue: 300000` so the six
-> objects place. RMG placement still varies per generation — if a zone lacks the six, **regenerate
-> once or twice** before concluding.
+> **Iteration notes:** getting the six objects to place reliably was finicky. They appeared in the
+> original config (zone `size: 1.0`, `guardedContentValue: 200000`, `guardRandomization: 0.0`) but
+> **vanished** after changes to `guardRandomization` (`0.5`, out of range), `size` (`1.5`), and
+> budget. Notably, **raising the budget back to `300000` did not restore them**, so the guarded
+> budget was *not* the cause — likely the larger `size`, the out-of-range randomization, or RMG
+> variance. The probe is now reverted to the known-good config (`size 1.0`, budget `200000`) with
+> **only `guardRandomization` differing** (A `0.0`, B `0.25`). RMG placement still varies — if a zone
+> lacks the six, **regenerate once or twice** before concluding.
+
+**✓ Confirmed:** with the reverted config both zones generated the six objects; Neutral-A (`0.0`) had
+uniform guard sizes while Neutral-B (`0.25`) had clearly varied sizes — `guardRandomization` is a
+per-guard ± spread on guard values.
+
+### Test 13 — zero / per-area content budgets — [`Doc-Probe-ZeroBudget.rmg.json`](test-templates/Doc-Probe-ZeroBudget.rmg.json)
+Resolves the Q5 budget questions. A 2-player chain with **three** neutral zones, all sharing the same
+guarded pool and having **no guarded mandatory content** (only unguarded mines), so any guarded
+object present must have come from the pool. They differ only in the guarded budget:
+- **Neutral-Zero** — `guardedContentValue: 0` **and** `guardedContentValuePerArea: 0` (the *Symmetry* case)
+- **Neutral-PerArea** — `guardedContentValue: 0`, `guardedContentValuePerArea: 2000` (per-area only)
+- **Neutral-Ctrl** — `guardedContentValue: 150000` (control)
+
+Walking from **Player 1**, the order is **Neutral-Zero → Neutral-PerArea → Neutral-Ctrl** (Player 2).
+All three should still show their unguarded mines + some unguarded/resource content, so a zone that
+generates but has **no guarded objects** is meaningful, not broken.
+
+**Observe & report — count the *guarded* objects (banks/buildings with guard stacks) in each:**
+- **Neutral-Zero:** any guarded objects at all? If **none**, a both-zero guarded budget means the
+  pool contributes nothing (only mandatory/explicit content appears — explaining how *Symmetry*
+  works with all-zero values). If some appear anyway, zero is a "use default" sentinel.
+- **Neutral-PerArea:** does guarded content appear here (proving `guardedContentValuePerArea` alone
+  drives content)? Roughly how much vs. the control?
+- **Neutral-Ctrl:** should have guarded content (sanity check).
+
+(If a zone is sparse, regenerate once or twice — RMG placement varies.)
+
+**✓ Confirmed:** Neutral-Zero (both-zero) → **no guarded content** (only mandatory unguarded mines +
+a little unguarded/resource content). Neutral-PerArea (`perArea: 2000` only) → guarded content
+present (so per-area alone works, area-scaled — it had *more* than the control). Neutral-Ctrl
+(`value: 150000`) → guarded content present. Only the both-nonzero combination rule is left untested.
 
 ### Further tests you can author by editing the probes
 - **Q4 (reaction distribution):** clone Probe-Base, give `Center` `guardReactionDistribution`

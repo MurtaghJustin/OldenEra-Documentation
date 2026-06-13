@@ -72,7 +72,7 @@ These shape how strongly content inside the zone is defended.
 | Field | Type | Meaning |
 |-------|------|---------|
 | `guardCutoffValue` | int | **Minimum guard value to keep (confirmed).** Any content guard whose computed value falls below this is **dropped entirely** — the object is left unguarded. A cutoff set above the zone's content guard values removes *all* guards (the zone becomes fully unguarded). Hence the common `1500` strips trivial sub-1500 guards. Observed: 0, 1000, 1500 (most common), 2000–3500. |
-| `guardRandomization` | double | Random ± fraction applied to guard values (e.g. `0.05` = ±5%). Official templates use `0.05`–`0.25`; **stay within that range** — a test at `0.5` (double the max) caused guarded objects to go missing from the zone. Exact spread behavior still being measured. |
+| `guardRandomization` | double | Per-guard random ± fraction applied to guard values (confirmed: at `0.25`, six identical objects had clearly varied guard sizes vs. uniform sizes at `0.0`). So `0.05` = ±5%. Official templates use `0.05`–`0.25`; **stay within that range** — a test at `0.5` (double the max) caused guarded objects to go missing from the zone. |
 | `guardMultiplier` | double | Scales the zone's **content** guard values (confirmed: a ×2.0 zone's guards were far stronger than an otherwise-identical ×0.5 zone). Does **not** affect border/connection guards. E.g. `0.85`, `1.0`. |
 | `guardWeeklyIncrement` | double | **Compounding** weekly growth fraction (confirmed): each week the guard value is multiplied by `(1 + increment)`. With `1.0` the guard **doubled every week** (1× → 2× → 4×). So `0.10` = +10% compounding per week. The same field on connections and main objects behaves the same way. |
 | `guardReactionDistribution` | int[6] | Six weights distributing the zone's **content/object guards** across six **disposition** tiers (index `0` = least aggressive → index `5` = friendliest). The *realised* reaction still resolves against relative army strength as normal: index-0 guards **flee only when the hero overwhelmingly outmatches them, and fight otherwise**; index-5 guards **offer to join**. Sets disposition, not guard strength, and does **not** affect border/connection guards (those always fight). Middle indices `1`–`4` unconfirmed. Examples: `[60,20,10,5,2,0]`, `[1,1,4,4,2,1]`, `[3,2,0,0,0,0]`. |
@@ -132,9 +132,19 @@ Each zone draws content from three pools, each with a value budget. Pools are re
 | `mandatoryContent` | string[] | Names of `mandatoryContent` groups guaranteed in this zone. |
 | `contentCountLimits` | string[] | Names of `contentCountLimits` rules applied to this zone. |
 
-> When the absolute `*Value` is `0` and a `*PerArea` value is set (or vice-versa), the non-zero one
-> governs; when *both* are `0` but a pool is referenced (as in *Symmetry*), how much actually
-> spawns is **unclear** — see [06](06-open-questions-and-tests.md).
+> **The value budgets drive pool content; `0` means none (confirmed).** A zone with
+> `guardedContentValue: 0` **and** `guardedContentValuePerArea: 0` but a guarded pool referenced
+> produced **no guarded content at all** — only its mandatory/explicit objects appeared. This is how
+> *Symmetry* (all value fields `0`) works: the pools contribute nothing and only mandatory content
+> spawns. So the absolute and per-area budgets are what pull content from a pool; a referenced pool
+> with a zero budget is inert.
+>
+> **Either budget alone works (confirmed).** `guardedContentValue` alone produces guarded content;
+> `guardedContentValuePerArea` alone *also* produces it, **scaling with zone area** (a `perArea: 2000`
+> zone yielded more guarded content than a separate `value: 150000` zone). So they're two independent
+> ways to fund a pool. (Tested for guarded; the unguarded/resource budgets behave the same way. Still
+> untested: how an absolute *and* a per-area value combine when **both** are non-zero — add, or one
+> overrides — see [06 Q5](06-open-questions-and-tests.md).)
 
 ### Biome selectors
 

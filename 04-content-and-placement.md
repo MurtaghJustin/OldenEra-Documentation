@@ -115,13 +115,14 @@ they contain, e.g. `content_list_building_random_hires_high_tier`,
 Root `mandatoryContent` is an array of **named groups**. A zone opts into a group by listing its
 name in the zone's `mandatoryContent` array; every item in the group is then placed in that zone.
 
-> **Guaranteed, but guarded mandatory items still need budget (observed).** Mandatory content is
-> normally guaranteed, **but guarded mandatory objects appear to draw on the zone's
-> `guardedContentValue` budget** — six guarded `tree_of_abundance` items placed fine with a
-> `300000` budget but **vanished entirely when the budget was dropped to `20000`** (too small to
-> fund their guards). So if a zone's guarded budget is too low to fund a guarded mandatory item's
-> guard, that item can be dropped. (Set `isGuarded: false` to place an item irrespective of the
-> guarded budget, or ensure the budget is large enough.)
+> **Mostly guaranteed — but placement can fail under some zone settings (cause not isolated).** In
+> testing, six guarded mandatory objects placed reliably in one zone configuration but **disappeared
+> entirely** under others while varying zone parameters (`guardRandomization`, `size`,
+> `guardedContentValue`). The trigger was **not** cleanly the guarded budget (a *larger* budget did
+> not restore them), so the cause is still undetermined — possibly large zone `size`, an
+> out-of-range `guardRandomization`, or RMG placement variance. Treat mandatory content as normally
+> guaranteed, but be aware extreme zone settings can drop it. (See
+> [06 Q5](06-open-questions-and-tests.md#zones--layout).)
 
 ```jsonc
 {
